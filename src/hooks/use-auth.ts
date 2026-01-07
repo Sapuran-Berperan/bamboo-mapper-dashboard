@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import * as authApi from "@/api/auth";
 import { useAuthStore } from "@/stores/auth-store";
-import type { LoginCredentials } from "@/types/auth";
+import type { LoginCredentials, RegisterCredentials } from "@/types/auth";
 
 export function useLogin() {
 	const setAuth = useAuthStore((state) => state.setAuth);
@@ -56,6 +56,19 @@ export function useRefreshToken() {
 		},
 		onError: () => {
 			logout();
+		},
+	});
+}
+
+export function useRegister() {
+	const navigate = useNavigate();
+
+	return useMutation({
+		mutationFn: (credentials: RegisterCredentials) =>
+			authApi.register(credentials),
+		onSuccess: () => {
+			// Redirect to login with success indicator
+			navigate({ to: "/login", search: { registered: true } });
 		},
 	});
 }

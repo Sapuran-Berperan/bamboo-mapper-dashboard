@@ -24,6 +24,18 @@ export interface LoginCredentials {
 	password: string;
 }
 
+// Register request payload
+export interface RegisterCredentials {
+	email: string;
+	name: string;
+	password: string;
+}
+
+// Register response data
+export interface RegisterResponse {
+	user: User;
+}
+
 // Login response data
 export interface LoginResponse {
 	access_token: string;

@@ -3,6 +3,8 @@ import type {
 	LoginCredentials,
 	LoginResponse,
 	RefreshResponse,
+	RegisterCredentials,
+	RegisterResponse,
 } from "@/types/auth";
 
 export async function login(
@@ -29,5 +31,14 @@ export async function logout(accessToken: string): Promise<void> {
 		headers: {
 			Authorization: `Bearer ${accessToken}`,
 		},
+	});
+}
+
+export async function register(
+	credentials: RegisterCredentials,
+): Promise<RegisterResponse> {
+	return apiClient<RegisterResponse>("/auth/register", {
+		method: "POST",
+		body: JSON.stringify(credentials),
 	});
 }
