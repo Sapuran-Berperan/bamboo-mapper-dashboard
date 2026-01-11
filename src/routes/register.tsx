@@ -34,6 +34,7 @@ function RegisterPage() {
 	const nameId = useId();
 	const emailId = useId();
 	const passwordId = useId();
+	const confirmPasswordId = useId();
 
 	const form = useForm<RegisterFormData>({
 		resolver: zodResolver(registerSchema),
@@ -41,6 +42,7 @@ function RegisterPage() {
 			name: "",
 			email: "",
 			password: "",
+			confirmPassword: "",
 		},
 	});
 
@@ -111,6 +113,28 @@ function RegisterPage() {
 										id={passwordId}
 										type="password"
 										placeholder="Minimal 8 karakter"
+										autoComplete="new-password"
+										aria-invalid={!!fieldState.error}
+										disabled={registerMutation.isPending}
+										{...field}
+									/>
+									<FieldError>{fieldState.error?.message}</FieldError>
+								</Field>
+							)}
+						/>
+
+						<Controller
+							control={form.control}
+							name="confirmPassword"
+							render={({ field, fieldState }) => (
+								<Field data-invalid={!!fieldState.error}>
+									<FieldLabel htmlFor={confirmPasswordId}>
+										Masukkan password kembali
+									</FieldLabel>
+									<Input
+										id={confirmPasswordId}
+										type="password"
+										placeholder="Masukkan password kembali"
 										autoComplete="new-password"
 										aria-invalid={!!fieldState.error}
 										disabled={registerMutation.isPending}
