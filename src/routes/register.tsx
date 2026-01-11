@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
-import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useId } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -61,25 +61,6 @@ function RegisterPage() {
 				</CardHeader>
 				<form onSubmit={form.handleSubmit(onSubmit)}>
 					<CardContent className="space-y-4">
-						{registerMutation.isError && (
-							<div className="flex items-center gap-2 p-3 text-sm text-destructive bg-destructive/10 rounded-md">
-								<AlertCircle className="h-4 w-4 shrink-0" />
-								<span>
-									{registerMutation.error?.message ||
-										"Registrasi gagal. Silakan coba lagi."}
-								</span>
-							</div>
-						)}
-
-						{registerMutation.isSuccess && (
-							<div className="flex items-center gap-2 p-3 text-sm text-green-600 bg-green-50 rounded-md">
-								<CheckCircle2 className="h-4 w-4 shrink-0" />
-								<span>
-									Registrasi berhasil! Mengalihkan ke halaman login...
-								</span>
-							</div>
-						)}
-
 						<Controller
 							control={form.control}
 							name="name"

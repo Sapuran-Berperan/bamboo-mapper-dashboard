@@ -1,11 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-	createFileRoute,
-	Link,
-	redirect,
-	useSearch,
-} from "@tanstack/react-router";
-import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { Loader2 } from "lucide-react";
 import { useId } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -23,14 +18,7 @@ import { useLogin } from "@/hooks/use-auth";
 import { type LoginFormData, loginSchema } from "@/lib/validations/auth";
 import { useAuthStore } from "@/stores/auth-store";
 
-interface LoginSearch {
-	registered?: boolean;
-}
-
 export const Route = createFileRoute("/login")({
-	validateSearch: (search: Record<string, unknown>): LoginSearch => ({
-		registered: search.registered === true || search.registered === "true",
-	}),
 	beforeLoad: () => {
 		// Redirect to home if already authenticated
 		const { isAuthenticated, isTokenExpired } = useAuthStore.getState();
@@ -42,7 +30,6 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginPage() {
-	const { registered } = useSearch({ from: "/login" });
 	const loginMutation = useLogin();
 	const emailId = useId();
 	const passwordId = useId();
@@ -72,25 +59,6 @@ function LoginPage() {
 				</CardHeader>
 				<form onSubmit={form.handleSubmit(onSubmit)}>
 					<CardContent className="space-y-4">
-						{registered && (
-							<div className="flex items-center gap-2 p-3 text-sm text-green-600 bg-green-50 rounded-md">
-								<CheckCircle2 className="h-4 w-4 shrink-0" />
-								<span>
-									Registrasi berhasil! Silakan login dengan akun baru Anda.
-								</span>
-							</div>
-						)}
-
-						{loginMutation.isError && (
-							<div className="flex items-center gap-2 p-3 text-sm text-destructive bg-destructive/10 rounded-md">
-								<AlertCircle className="h-4 w-4 shrink-0" />
-								<span>
-									{loginMutation.error?.message ||
-										"Login gagal. Silakan coba lagi."}
-								</span>
-							</div>
-						)}
-
 						<Controller
 							control={form.control}
 							name="email"

@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
+import toast from "react-hot-toast";
 import * as authApi from "@/api/auth";
 import { useAuthStore } from "@/stores/auth-store";
 import type { LoginCredentials, RegisterCredentials } from "@/types/auth";
@@ -9,7 +10,12 @@ export function useLogin() {
 	const navigate = useNavigate();
 
 	return useMutation({
-		mutationFn: (credentials: LoginCredentials) => authApi.login(credentials),
+		mutationFn: (credentials: LoginCredentials) =>
+			toast.promise(authApi.login(credentials), {
+				loading: "Memproses login...",
+				success: "Login berhasil!",
+				error: (err) => err.message || "Login gagal. Silakan coba lagi.",
+			}),
 		onSuccess: (data) => {
 			setAuth(data);
 			// Navigate to the page user was trying to access, or home
@@ -65,10 +71,13 @@ export function useRegister() {
 
 	return useMutation({
 		mutationFn: (credentials: RegisterCredentials) =>
-			authApi.register(credentials),
+			toast.promise(authApi.register(credentials), {
+				loading: "Mendaftarkan akun...",
+				success: "Registrasi berhasil! Silakan login.",
+				error: (err) => err.message || "Registrasi gagal. Silakan coba lagi.",
+			}),
 		onSuccess: () => {
-			// Redirect to login with success indicator
-			navigate({ to: "/login", search: { registered: true } });
+			navigate({ to: "/login" });
 		},
 	});
 }

@@ -7,6 +7,7 @@ import {
 	useLocation,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { Toaster } from "react-hot-toast";
 import { useAuthStore } from "@/stores/auth-store";
 import Header from "../components/Header";
 
@@ -49,6 +50,7 @@ function RootComponent() {
 		<>
 			{!isPublicRoute && <Header />}
 			<Outlet />
+			<Toaster position="top-center" />
 			<TanStackDevtools
 				config={{
 					position: "bottom-right",
