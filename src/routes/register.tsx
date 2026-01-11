@@ -15,7 +15,7 @@ import {
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useRegister } from "@/hooks/use-auth";
-import { registerSchema, type RegisterFormData } from "@/lib/validations/auth";
+import { type RegisterFormData, registerSchema } from "@/lib/validations/auth";
 import { useAuthStore } from "@/stores/auth-store";
 
 export const Route = createFileRoute("/register")({
