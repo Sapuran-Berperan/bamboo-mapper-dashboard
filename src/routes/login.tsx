@@ -1,3 +1,4 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
 	createFileRoute,
 	Link,
@@ -5,7 +6,8 @@ import {
 	useSearch,
 } from "@tanstack/react-router";
 import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
-import { useId, useState } from "react";
+import { useId } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -15,9 +17,10 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useLogin } from "@/hooks/use-auth";
+import { type LoginFormData, loginSchema } from "@/lib/validations/auth";
 import { useAuthStore } from "@/stores/auth-store";
 
 interface LoginSearch {
@@ -40,15 +43,20 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
 	const { registered } = useSearch({ from: "/login" });
+	const loginMutation = useLogin();
 	const emailId = useId();
 	const passwordId = useId();
-	const [email, setEmail] = useState("");
-	const [password, setPassword] = useState("");
-	const loginMutation = useLogin();
 
-	const handleSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
-		loginMutation.mutate({ email, password });
+	const form = useForm<LoginFormData>({
+		resolver: zodResolver(loginSchema),
+		defaultValues: {
+			email: "",
+			password: "",
+		},
+	});
+
+	const onSubmit = (data: LoginFormData) => {
+		loginMutation.mutate(data);
 	};
 
 	return (
@@ -62,7 +70,7 @@ function LoginPage() {
 						Masuk ke dashboard untuk mengelola data bambu
 					</CardDescription>
 				</CardHeader>
-				<form onSubmit={handleSubmit}>
+				<form onSubmit={form.handleSubmit(onSubmit)}>
 					<CardContent className="space-y-4">
 						{registered && (
 							<div className="flex items-center gap-2 p-3 text-sm text-green-600 bg-green-50 rounded-md">
@@ -83,33 +91,45 @@ function LoginPage() {
 							</div>
 						)}
 
-						<div className="space-y-2">
-							<Label htmlFor={emailId}>Email</Label>
-							<Input
-								id={emailId}
-								type="email"
-								placeholder="nama@example.com"
-								value={email}
-								onChange={(e) => setEmail(e.target.value)}
-								required
-								autoComplete="email"
-								disabled={loginMutation.isPending}
-							/>
-						</div>
+						<Controller
+							control={form.control}
+							name="email"
+							render={({ field, fieldState }) => (
+								<Field data-invalid={!!fieldState.error}>
+									<FieldLabel htmlFor={emailId}>Email</FieldLabel>
+									<Input
+										id={emailId}
+										type="email"
+										placeholder="nama@example.com"
+										autoComplete="email"
+										aria-invalid={!!fieldState.error}
+										disabled={loginMutation.isPending}
+										{...field}
+									/>
+									<FieldError>{fieldState.error?.message}</FieldError>
+								</Field>
+							)}
+						/>
 
-						<div className="space-y-2">
-							<Label htmlFor={passwordId}>Password</Label>
-							<Input
-								id={passwordId}
-								type="password"
-								placeholder="Masukkan password"
-								value={password}
-								onChange={(e) => setPassword(e.target.value)}
-								required
-								autoComplete="current-password"
-								disabled={loginMutation.isPending}
-							/>
-						</div>
+						<Controller
+							control={form.control}
+							name="password"
+							render={({ field, fieldState }) => (
+								<Field data-invalid={!!fieldState.error}>
+									<FieldLabel htmlFor={passwordId}>Password</FieldLabel>
+									<Input
+										id={passwordId}
+										type="password"
+										placeholder="Masukkan password"
+										autoComplete="current-password"
+										aria-invalid={!!fieldState.error}
+										disabled={loginMutation.isPending}
+										{...field}
+									/>
+									<FieldError>{fieldState.error?.message}</FieldError>
+								</Field>
+							)}
+						/>
 					</CardContent>
 
 					<CardFooter className="flex flex-col mt-6 space-y-4">

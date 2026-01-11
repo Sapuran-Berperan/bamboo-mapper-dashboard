@@ -1,6 +1,8 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
-import { useId, useState } from "react";
+import { useId } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -10,9 +12,10 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useRegister } from "@/hooks/use-auth";
+import { registerSchema, type RegisterFormData } from "@/lib/validations/auth";
 import { useAuthStore } from "@/stores/auth-store";
 
 export const Route = createFileRoute("/register")({
@@ -27,17 +30,22 @@ export const Route = createFileRoute("/register")({
 });
 
 function RegisterPage() {
+	const registerMutation = useRegister();
 	const nameId = useId();
 	const emailId = useId();
 	const passwordId = useId();
-	const [name, setName] = useState("");
-	const [email, setEmail] = useState("");
-	const [password, setPassword] = useState("");
-	const registerMutation = useRegister();
 
-	const handleSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
-		registerMutation.mutate({ name, email, password });
+	const form = useForm<RegisterFormData>({
+		resolver: zodResolver(registerSchema),
+		defaultValues: {
+			name: "",
+			email: "",
+			password: "",
+		},
+	});
+
+	const onSubmit = (data: RegisterFormData) => {
+		registerMutation.mutate(data);
 	};
 
 	return (
@@ -51,7 +59,7 @@ function RegisterPage() {
 						Buat akun baru untuk mengakses dashboard Bamboo Mapper
 					</CardDescription>
 				</CardHeader>
-				<form onSubmit={handleSubmit}>
+				<form onSubmit={form.handleSubmit(onSubmit)}>
 					<CardContent className="space-y-4">
 						{registerMutation.isError && (
 							<div className="flex items-center gap-2 p-3 text-sm text-destructive bg-destructive/10 rounded-md">
@@ -72,49 +80,65 @@ function RegisterPage() {
 							</div>
 						)}
 
-						<div className="space-y-2">
-							<Label htmlFor={nameId}>Nama</Label>
-							<Input
-								id={nameId}
-								type="text"
-								placeholder="Nama lengkap"
-								value={name}
-								onChange={(e) => setName(e.target.value)}
-								required
-								maxLength={100}
-								autoComplete="name"
-								disabled={registerMutation.isPending}
-							/>
-						</div>
+						<Controller
+							control={form.control}
+							name="name"
+							render={({ field, fieldState }) => (
+								<Field data-invalid={!!fieldState.error}>
+									<FieldLabel htmlFor={nameId}>Nama</FieldLabel>
+									<Input
+										id={nameId}
+										type="text"
+										placeholder="Nama lengkap"
+										autoComplete="name"
+										aria-invalid={!!fieldState.error}
+										disabled={registerMutation.isPending}
+										{...field}
+									/>
+									<FieldError>{fieldState.error?.message}</FieldError>
+								</Field>
+							)}
+						/>
 
-						<div className="space-y-2">
-							<Label htmlFor={emailId}>Email</Label>
-							<Input
-								id={emailId}
-								type="email"
-								placeholder="nama@example.com"
-								value={email}
-								onChange={(e) => setEmail(e.target.value)}
-								required
-								autoComplete="email"
-								disabled={registerMutation.isPending}
-							/>
-						</div>
+						<Controller
+							control={form.control}
+							name="email"
+							render={({ field, fieldState }) => (
+								<Field data-invalid={!!fieldState.error}>
+									<FieldLabel htmlFor={emailId}>Email</FieldLabel>
+									<Input
+										id={emailId}
+										type="email"
+										placeholder="nama@example.com"
+										autoComplete="email"
+										aria-invalid={!!fieldState.error}
+										disabled={registerMutation.isPending}
+										{...field}
+									/>
+									<FieldError>{fieldState.error?.message}</FieldError>
+								</Field>
+							)}
+						/>
 
-						<div className="space-y-2">
-							<Label htmlFor={passwordId}>Password</Label>
-							<Input
-								id={passwordId}
-								type="password"
-								placeholder="Minimal 8 karakter"
-								value={password}
-								onChange={(e) => setPassword(e.target.value)}
-								required
-								minLength={8}
-								autoComplete="new-password"
-								disabled={registerMutation.isPending}
-							/>
-						</div>
+						<Controller
+							control={form.control}
+							name="password"
+							render={({ field, fieldState }) => (
+								<Field data-invalid={!!fieldState.error}>
+									<FieldLabel htmlFor={passwordId}>Password</FieldLabel>
+									<Input
+										id={passwordId}
+										type="password"
+										placeholder="Minimal 8 karakter"
+										autoComplete="new-password"
+										aria-invalid={!!fieldState.error}
+										disabled={registerMutation.isPending}
+										{...field}
+									/>
+									<FieldError>{fieldState.error?.message}</FieldError>
+								</Field>
+							)}
+						/>
 					</CardContent>
 
 					<CardFooter className="flex flex-col mt-6 space-y-4">
