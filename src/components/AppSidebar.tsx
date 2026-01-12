@@ -76,7 +76,9 @@ export function AppSidebar() {
 							{user?.name?.charAt(0).toUpperCase() ?? "U"}
 						</div>
 						<div className="flex flex-col">
-							<span className="text-sm font-medium">{user?.name ?? "User"}</span>
+							<span className="text-sm font-medium">
+								{user?.name ?? "User"}
+							</span>
 							<span className="text-xs text-muted-foreground">
 								{user?.email ?? ""}
 							</span>

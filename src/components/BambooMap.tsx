@@ -21,7 +21,9 @@ interface BambooMapProps {
 	className?: string;
 }
 
-const DEFAULT_CENTER: [number, number] = [-7.434757155465858, 109.99181955541324];
+const DEFAULT_CENTER: [number, number] = [
+	-7.434757155465858, 109.99181955541324,
+];
 const DEFAULT_ZOOM = 13;
 
 export function BambooMap({ markers, className }: BambooMapProps) {
