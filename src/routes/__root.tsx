@@ -8,8 +8,9 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { Toaster } from "react-hot-toast";
+import { AppSidebar } from "@/components/AppSidebar";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuthStore } from "@/stores/auth-store";
-import Header from "../components/Header";
 
 // Routes that don't require authentication
 const PUBLIC_ROUTES = ["/login", "/register"];
@@ -46,10 +47,37 @@ function RootComponent() {
 		location.pathname.startsWith(route),
 	);
 
+	if (isPublicRoute) {
+		return (
+			<>
+				<Outlet />
+				<Toaster position="top-center" />
+				<TanStackDevtools
+					config={{
+						position: "bottom-right",
+					}}
+					plugins={[
+						{
+							name: "Tanstack Router",
+							render: <TanStackRouterDevtoolsPanel />,
+						},
+					]}
+				/>
+			</>
+		);
+	}
+
 	return (
-		<>
-			{!isPublicRoute && <Header />}
-			<Outlet />
+		<SidebarProvider>
+			<AppSidebar />
+			<SidebarInset>
+				<header className="flex h-14 items-center gap-2 border-b px-4">
+					<SidebarTrigger />
+				</header>
+				<main className="flex-1">
+					<Outlet />
+				</main>
+			</SidebarInset>
 			<Toaster position="top-center" />
 			<TanStackDevtools
 				config={{
@@ -62,6 +90,6 @@ function RootComponent() {
 					},
 				]}
 			/>
-		</>
+		</SidebarProvider>
 	);
 }

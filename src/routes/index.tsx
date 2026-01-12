@@ -13,7 +13,7 @@ function HomePage() {
 
 	if (isLoading) {
 		return (
-			<div className="flex items-center justify-center h-[calc(100vh-72px)]">
+			<div className="flex items-center justify-center h-[calc(100vh-3.5rem)]">
 				<div className="flex flex-col items-center gap-2 text-muted-foreground">
 					<Loader2 className="h-8 w-8 animate-spin" />
 					<p>Memuat data marker...</p>
@@ -24,7 +24,7 @@ function HomePage() {
 
 	if (error) {
 		return (
-			<div className="flex items-center justify-center h-[calc(100vh-72px)]">
+			<div className="flex items-center justify-center h-[calc(100vh-3.5rem)]">
 				<div className="flex flex-col items-center gap-3 text-destructive max-w-md text-center">
 					<AlertCircle className="h-10 w-10" />
 					<p className="font-medium">Gagal memuat data marker</p>
@@ -40,7 +40,7 @@ function HomePage() {
 	}
 
 	return (
-		<main className="h-[calc(100vh-72px)] flex flex-col">
+		<main className="h-[calc(100vh-3.5rem)] flex flex-col">
 			<div className="px-4 py-3 bg-muted/50 border-b flex items-center gap-2">
 				<MapPin className="h-4 w-4 text-muted-foreground" />
 				<span className="text-sm text-muted-foreground">
