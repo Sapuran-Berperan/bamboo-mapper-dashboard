@@ -33,10 +33,15 @@ export function useLogout() {
 
 	return useMutation({
 		mutationFn: () => {
-			if (accessToken) {
-				return authApi.logout(accessToken);
-			}
-			return Promise.resolve();
+			const logoutPromise = accessToken
+				? authApi.logout(accessToken)
+				: Promise.resolve();
+
+			return toast.promise(logoutPromise, {
+				loading: "Keluar dari akun...",
+				success: "Berhasil keluar!",
+				error: "Gagal keluar. Silakan coba lagi.",
+			});
 		},
 		onSettled: () => {
 			// Clear auth state regardless of API success
