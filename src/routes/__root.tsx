@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { Toaster } from "react-hot-toast";
+import * as authApi from "@/api/auth";
 import { AppSidebar } from "@/components/AppSidebar";
 import {
 	SidebarInset,
@@ -24,22 +25,46 @@ interface RouterContext {
 }
 
 export const Route = createRootRouteWithContext<RouterContext>()({
-	beforeLoad: ({ location }) => {
+	beforeLoad: async ({ location }) => {
 		// Skip auth check for public routes
 		if (PUBLIC_ROUTES.some((route) => location.pathname.startsWith(route))) {
 			return;
 		}
 
 		// Check authentication
-		const { isAuthenticated, isTokenExpired } = useAuthStore.getState();
+		const {
+			isAuthenticated,
+			isTokenExpired,
+			refreshToken,
+			updateTokens,
+			logout,
+		} = useAuthStore.getState();
 
-		if (!isAuthenticated || isTokenExpired()) {
-			// Store the intended destination for redirect after login
+		// Not authenticated at all
+		if (!isAuthenticated) {
 			sessionStorage.setItem("redirectAfterLogin", location.href);
+			throw redirect({ to: "/login" });
+		}
 
-			throw redirect({
-				to: "/login",
-			});
+		// Token expired but refresh token exists - attempt refresh
+		if (isTokenExpired() && refreshToken) {
+			try {
+				const response = await authApi.refreshToken(refreshToken);
+				updateTokens(response);
+				return; // Token refreshed successfully, continue to route
+			} catch {
+				// Refresh failed - clear auth and redirect to login
+				logout();
+				sessionStorage.setItem("redirectAfterLogin", location.href);
+				throw redirect({ to: "/login" });
+			}
+		}
+
+		// Token expired and no refresh token available
+		if (isTokenExpired()) {
+			logout();
+			sessionStorage.setItem("redirectAfterLogin", location.href);
+			throw redirect({ to: "/login" });
 		}
 	},
 	component: RootComponent,
