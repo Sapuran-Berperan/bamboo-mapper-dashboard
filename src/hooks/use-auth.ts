@@ -1,7 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
+import { useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import * as authApi from "@/api/auth";
+import { ApiError } from "@/lib/api-client";
 import { useAuthStore } from "@/stores/auth-store";
 import type { LoginCredentials, RegisterCredentials } from "@/types/auth";
 
@@ -85,4 +87,40 @@ export function useRegister() {
 			navigate({ to: "/login" });
 		},
 	});
+}
+
+const DEFAULT_VALIDATION_INTERVAL = 5 * 60 * 1000; // 5 minutes
+
+export function useAuthValidation(intervalMs = DEFAULT_VALIDATION_INTERVAL) {
+	const { isAuthenticated, accessToken, logout, updateUser } = useAuthStore();
+	const isValidatingRef = useRef(false);
+
+	useEffect(() => {
+		if (!isAuthenticated || !accessToken) return;
+
+		const validate = async () => {
+			// Prevent concurrent validation calls
+			if (isValidatingRef.current) return;
+			isValidatingRef.current = true;
+
+			try {
+				const user = await authApi.getMe(accessToken);
+				updateUser(user);
+			} catch (error) {
+				if (error instanceof ApiError && error.status === 401) {
+					logout();
+				}
+				// Silently ignore other errors (network issues, etc.)
+			} finally {
+				isValidatingRef.current = false;
+			}
+		};
+
+		// Validate immediately on mount
+		validate();
+
+		// Set up periodic revalidation
+		const interval = setInterval(validate, intervalMs);
+		return () => clearInterval(interval);
+	}, [isAuthenticated, accessToken, logout, updateUser, intervalMs]);
 }

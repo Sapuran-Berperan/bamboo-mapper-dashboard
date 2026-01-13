@@ -15,6 +15,7 @@ import {
 	SidebarProvider,
 	SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { useAuthValidation } from "@/hooks/use-auth";
 import { useAuthStore } from "@/stores/auth-store";
 
 // Routes that don't require authentication
@@ -75,6 +76,9 @@ function RootComponent() {
 	const isPublicRoute = PUBLIC_ROUTES.some((route) =>
 		location.pathname.startsWith(route),
 	);
+
+	// Validate auth on mount and periodically for protected routes
+	useAuthValidation();
 
 	if (isPublicRoute) {
 		return (

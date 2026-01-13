@@ -66,6 +66,7 @@ export interface AuthState {
 export interface AuthActions {
 	setAuth: (data: LoginResponse) => void;
 	updateTokens: (data: RefreshResponse) => void;
+	updateUser: (user: User) => void;
 	logout: () => void;
 	isTokenExpired: () => boolean;
 }

@@ -5,6 +5,7 @@ import type {
 	AuthState,
 	LoginResponse,
 	RefreshResponse,
+	User,
 } from "@/types/auth";
 
 const STORAGE_KEY = "bamboo-mapper-auth";
@@ -38,6 +39,10 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 					refreshToken: data.refresh_token,
 					expiresAt,
 				});
+			},
+
+			updateUser: (user: User) => {
+				set({ user });
 			},
 
 			logout: () => {

@@ -5,6 +5,7 @@ import type {
 	RefreshResponse,
 	RegisterCredentials,
 	RegisterResponse,
+	User,
 } from "@/types/auth";
 
 export async function login(
@@ -40,5 +41,14 @@ export async function register(
 	return apiClient<RegisterResponse>("/auth/register", {
 		method: "POST",
 		body: JSON.stringify(credentials),
+	});
+}
+
+export async function getMe(accessToken: string): Promise<User> {
+	return apiClient<User>("/auth/me", {
+		method: "GET",
+		headers: {
+			Authorization: `Bearer ${accessToken}`,
+		},
 	});
 }
