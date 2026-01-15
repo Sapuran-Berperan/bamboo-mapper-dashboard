@@ -4,7 +4,8 @@ import {
 	getCoreRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, Pencil } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	Table,
@@ -16,6 +17,7 @@ import {
 } from "@/components/ui/table";
 import type { MarkersSearch } from "@/routes/markers";
 import type { MarkerDetail } from "@/types/marker";
+import { MarkerFormDialog } from "./MarkerFormDialog";
 
 function formatDateTime(dateString: string): string {
 	const date = new Date(dateString);
@@ -88,6 +90,8 @@ export function MarkersTable({
 	sortDir,
 	onSort,
 }: MarkersTableProps) {
+	const [editingMarker, setEditingMarker] = useState<MarkerDetail | null>(null);
+
 	const columns: ColumnDef<MarkerDetail>[] = [
 		{
 			accessorKey: "short_code",
@@ -195,6 +199,20 @@ export function MarkersTable({
 			),
 			cell: ({ row }) => formatDateTime(row.getValue("updated_at")),
 		},
+		{
+			id: "actions",
+			header: "Aksi",
+			cell: ({ row }) => (
+				<Button
+					variant="ghost"
+					size="icon"
+					onClick={() => setEditingMarker(row.original)}
+					title="Edit marker"
+				>
+					<Pencil className="h-4 w-4" />
+				</Button>
+			),
+		},
 	];
 
 	const table = useReactTable({
@@ -206,44 +224,61 @@ export function MarkersTable({
 	});
 
 	return (
-		<div className="rounded-md border">
-			<Table>
-				<TableHeader>
-					{table.getHeaderGroups().map((headerGroup) => (
-						<TableRow key={headerGroup.id}>
-							{headerGroup.headers.map((header) => (
-								<TableHead key={header.id}>
-									{header.isPlaceholder
-										? null
-										: flexRender(
-												header.column.columnDef.header,
-												header.getContext(),
-											)}
-								</TableHead>
-							))}
-						</TableRow>
-					))}
-				</TableHeader>
-				<TableBody>
-					{table.getRowModel().rows?.length ? (
-						table.getRowModel().rows.map((row) => (
-							<TableRow key={row.id}>
-								{row.getVisibleCells().map((cell) => (
-									<TableCell key={cell.id}>
-										{flexRender(cell.column.columnDef.cell, cell.getContext())}
-									</TableCell>
+		<>
+			<div className="rounded-md border">
+				<Table>
+					<TableHeader>
+						{table.getHeaderGroups().map((headerGroup) => (
+							<TableRow key={headerGroup.id}>
+								{headerGroup.headers.map((header) => (
+									<TableHead key={header.id}>
+										{header.isPlaceholder
+											? null
+											: flexRender(
+													header.column.columnDef.header,
+													header.getContext(),
+												)}
+									</TableHead>
 								))}
 							</TableRow>
-						))
-					) : (
-						<TableRow>
-							<TableCell colSpan={columns.length} className="h-24 text-center">
-								Tidak ada data marker.
-							</TableCell>
-						</TableRow>
-					)}
-				</TableBody>
-			</Table>
-		</div>
+						))}
+					</TableHeader>
+					<TableBody>
+						{table.getRowModel().rows?.length ? (
+							table.getRowModel().rows.map((row) => (
+								<TableRow key={row.id}>
+									{row.getVisibleCells().map((cell) => (
+										<TableCell key={cell.id}>
+											{flexRender(
+												cell.column.columnDef.cell,
+												cell.getContext(),
+											)}
+										</TableCell>
+									))}
+								</TableRow>
+							))
+						) : (
+							<TableRow>
+								<TableCell
+									colSpan={columns.length}
+									className="h-24 text-center"
+								>
+									Tidak ada data marker.
+								</TableCell>
+							</TableRow>
+						)}
+					</TableBody>
+				</Table>
+			</div>
+
+			{/* Edit Marker Dialog */}
+			<MarkerFormDialog
+				marker={editingMarker ?? undefined}
+				open={!!editingMarker}
+				onOpenChange={(open) => {
+					if (!open) setEditingMarker(null);
+				}}
+			/>
+		</>
 	);
 }

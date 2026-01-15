@@ -61,3 +61,5 @@ export interface CreateMarkerPayload {
 	owner_name?: string;
 	owner_contact?: string;
 }
+
+export type UpdateMarkerPayload = CreateMarkerPayload;

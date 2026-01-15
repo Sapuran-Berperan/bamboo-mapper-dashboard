@@ -142,18 +142,22 @@ export interface PaginatedApiResponse<T> {
 	};
 }
 
+interface MultipartApiClientOptions extends Omit<ApiClientOptions, "body"> {
+	method?: "POST" | "PUT";
+}
+
 export async function multipartApiClient<T>(
 	endpoint: string,
 	formData: FormData,
-	options: Omit<ApiClientOptions, "body"> = {},
+	options: MultipartApiClientOptions = {},
 ): Promise<T> {
-	const { _isRetry, ...fetchOptions } = options;
+	const { _isRetry, method = "POST", ...fetchOptions } = options;
 	const url = `${API_BASE_URL}${endpoint}`;
 
 	// Don't set Content-Type - browser sets it with boundary for FormData
 	const config: RequestInit = {
 		...fetchOptions,
-		method: "POST",
+		method,
 		body: formData,
 	};
 
@@ -173,6 +177,7 @@ export async function multipartApiClient<T>(
 
 			return multipartApiClient<T>(endpoint, formData, {
 				...fetchOptions,
+				method,
 				headers: Object.fromEntries(retryHeaders.entries()),
 				_isRetry: true,
 			});

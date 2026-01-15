@@ -10,6 +10,7 @@ import type {
 	MarkerDetail,
 	PaginatedMarkersParams,
 	PaginatedMarkersResponse,
+	UpdateMarkerPayload,
 } from "@/types/marker";
 
 export async function getMarkers(): Promise<Marker[]> {
@@ -93,6 +94,36 @@ export async function createMarker(
 	if (image) formData.append("image", image);
 
 	return multipartApiClient<MarkerDetail>("/markers/", formData, {
+		headers: {
+			Authorization: `Bearer ${accessToken}`,
+		},
+	});
+}
+
+export async function updateMarker(
+	id: string,
+	data: UpdateMarkerPayload,
+	image?: File,
+): Promise<MarkerDetail> {
+	const accessToken = useAuthStore.getState().accessToken;
+	const formData = new FormData();
+
+	// Append required fields
+	formData.append("name", data.name);
+	formData.append("latitude", data.latitude);
+	formData.append("longitude", data.longitude);
+
+	// Append optional fields only if they have values
+	if (data.description) formData.append("description", data.description);
+	if (data.strain) formData.append("strain", data.strain);
+	if (data.quantity !== undefined)
+		formData.append("quantity", String(data.quantity));
+	if (data.owner_name) formData.append("owner_name", data.owner_name);
+	if (data.owner_contact) formData.append("owner_contact", data.owner_contact);
+	if (image) formData.append("image", image);
+
+	return multipartApiClient<MarkerDetail>(`/markers/${id}`, formData, {
+		method: "PUT",
 		headers: {
 			Authorization: `Bearer ${accessToken}`,
 		},

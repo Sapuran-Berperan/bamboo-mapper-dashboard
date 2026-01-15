@@ -4,7 +4,7 @@ import { useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { usePaginatedMarkers } from "@/hooks/use-paginated-markers";
 import { type MarkersSearch, Route } from "@/routes/markers";
-import { CreateMarkerDialog } from "./CreateMarkerDialog";
+import { MarkerFormDialog } from "./MarkerFormDialog";
 import { MarkersFilters } from "./MarkersFilters";
 import { MarkersPagination } from "./MarkersPagination";
 import { MarkersTable } from "./MarkersTable";
@@ -106,7 +106,7 @@ export function MarkersPage() {
 					</span>
 					{isFetching && <Loader2 className="h-4 w-4 animate-spin ml-2" />}
 				</div>
-				<CreateMarkerDialog />
+				<MarkerFormDialog />
 			</div>
 
 			<MarkersFilters

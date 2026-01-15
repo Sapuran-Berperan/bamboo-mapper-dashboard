@@ -2,9 +2,21 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { MarkersPage } from "@/components/markers/MarkersPage";
 
+// Helper to handle empty string -> undefined for optional numbers
+const optionalNumber = z
+	.union([z.string(), z.number()])
+	.optional()
+	.transform((val) => {
+		if (val === "" || val === undefined) return undefined;
+		const num = typeof val === "number" ? val : Number(val);
+		return Number.isNaN(num) ? undefined : num;
+	});
+
 const markersSearchSchema = z.object({
-	page: z.coerce.number().min(1).optional().default(1),
-	per_page: z.coerce.number().min(1).max(100).optional().default(10),
+	page: optionalNumber.pipe(z.number().min(1).optional()).default(1),
+	per_page: optionalNumber
+		.pipe(z.number().min(1).max(100).optional())
+		.default(10),
 	sort_by: z
 		.enum(["name", "created_at", "updated_at", "strain", "quantity"])
 		.optional(),
