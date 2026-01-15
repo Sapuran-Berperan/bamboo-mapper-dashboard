@@ -131,3 +131,73 @@ export async function apiClient<T>(
 
 	return json.data as T;
 }
+
+export interface PaginatedApiResponse<T> {
+	data: T;
+	pagination: {
+		current_page: number;
+		per_page: number;
+		total_items: number;
+		total_pages: number;
+	};
+}
+
+export async function paginatedApiClient<T>(
+	endpoint: string,
+	options: ApiClientOptions = {},
+): Promise<PaginatedApiResponse<T>> {
+	const { _isRetry, ...fetchOptions } = options;
+	const url = `${API_BASE_URL}${endpoint}`;
+
+	const config: RequestInit = {
+		...fetchOptions,
+		headers: {
+			"Content-Type": "application/json",
+			...fetchOptions.headers,
+		},
+	};
+
+	const response = await fetch(url, config);
+
+	// Handle 401 Unauthorized - attempt token refresh
+	if (response.status === 401 && !_isRetry) {
+		const refreshed = await attemptRefresh();
+
+		if (refreshed) {
+			const newAccessToken = useAuthStore.getState().accessToken;
+
+			const retryHeaders = new Headers(config.headers);
+			if (retryHeaders.has("Authorization")) {
+				retryHeaders.set("Authorization", `Bearer ${newAccessToken}`);
+			}
+
+			return paginatedApiClient<T>(endpoint, {
+				...fetchOptions,
+				headers: Object.fromEntries(retryHeaders.entries()),
+				_isRetry: true,
+			});
+		}
+
+		const json = await response.clone().json();
+		throw new ApiError(
+			response.status,
+			json.meta?.message || "Session expired. Please login again.",
+			json.meta?.details,
+		);
+	}
+
+	const json = await response.json();
+
+	if (!response.ok || !json.meta?.success) {
+		throw new ApiError(
+			response.status,
+			json.meta?.message || "Request failed",
+			json.meta?.details,
+		);
+	}
+
+	return {
+		data: json.data,
+		pagination: json.meta.pagination,
+	};
+}

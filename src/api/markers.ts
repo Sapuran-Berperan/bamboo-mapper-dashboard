@@ -1,6 +1,11 @@
-import { apiClient } from "@/lib/api-client";
+import { apiClient, paginatedApiClient } from "@/lib/api-client";
 import { useAuthStore } from "@/stores/auth-store";
-import type { Marker } from "@/types/marker";
+import type {
+	Marker,
+	MarkerDetail,
+	PaginatedMarkersParams,
+	PaginatedMarkersResponse,
+} from "@/types/marker";
 
 export async function getMarkers(): Promise<Marker[]> {
 	const accessToken = useAuthStore.getState().accessToken;
@@ -11,4 +16,52 @@ export async function getMarkers(): Promise<Marker[]> {
 			Authorization: `Bearer ${accessToken}`,
 		},
 	});
+}
+
+export async function getPaginatedMarkers(
+	params: PaginatedMarkersParams = {},
+): Promise<PaginatedMarkersResponse> {
+	const accessToken = useAuthStore.getState().accessToken;
+
+	const searchParams = new URLSearchParams();
+
+	if (params.page !== undefined) {
+		searchParams.set("page", String(params.page));
+	}
+	if (params.per_page !== undefined) {
+		searchParams.set("per_page", String(params.per_page));
+	}
+	if (params.sort_by) {
+		searchParams.set("sort_by", params.sort_by);
+	}
+	if (params.sort_dir) {
+		searchParams.set("sort_dir", params.sort_dir);
+	}
+	if (params.search) {
+		searchParams.set("search", params.search);
+	}
+	if (params.date_from) {
+		searchParams.set("date_from", params.date_from);
+	}
+	if (params.date_to) {
+		searchParams.set("date_to", params.date_to);
+	}
+	if (params.creator_id) {
+		searchParams.set("creator_id", params.creator_id);
+	}
+
+	const queryString = searchParams.toString();
+	const endpoint = `/markers/paginated${queryString ? `?${queryString}` : ""}`;
+
+	const response = await paginatedApiClient<MarkerDetail[]>(endpoint, {
+		method: "GET",
+		headers: {
+			Authorization: `Bearer ${accessToken}`,
+		},
+	});
+
+	return {
+		data: response.data,
+		pagination: response.pagination,
+	};
 }

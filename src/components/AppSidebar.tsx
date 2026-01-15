@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Home, LogOut } from "lucide-react";
+import { Home, LogOut, Table2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
 	Sidebar,
@@ -22,6 +22,11 @@ const menuItems = [
 		title: "Beranda",
 		url: "/",
 		icon: Home,
+	},
+	{
+		title: "Daftar Marker",
+		url: "/markers",
+		icon: Table2,
 	},
 ];
 
