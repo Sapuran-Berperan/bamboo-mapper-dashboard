@@ -1,9 +1,9 @@
-import { useCallback } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { AlertCircle, Loader2, Table2 } from "lucide-react";
+import { useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { usePaginatedMarkers } from "@/hooks/use-paginated-markers";
-import { Route, type MarkersSearch } from "@/routes/markers";
+import { type MarkersSearch, Route } from "@/routes/markers";
 import { MarkersFilters } from "./MarkersFilters";
 import { MarkersPagination } from "./MarkersPagination";
 import { MarkersTable } from "./MarkersTable";

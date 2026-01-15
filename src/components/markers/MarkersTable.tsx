@@ -14,8 +14,8 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import type { MarkerDetail } from "@/types/marker";
 import type { MarkersSearch } from "@/routes/markers";
+import type { MarkerDetail } from "@/types/marker";
 
 function formatDateTime(dateString: string): string {
 	const date = new Date(dateString);

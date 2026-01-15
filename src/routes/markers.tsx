@@ -18,7 +18,7 @@ const markersSearchSchema = z.object({
 		.string()
 		.regex(/^\d{4}-\d{2}-\d{2}$/)
 		.optional(),
-	creator_id: z.string().uuid().optional(),
+	creator_id: z.uuid().optional(),
 });
 
 export type MarkersSearch = z.infer<typeof markersSearchSchema>;

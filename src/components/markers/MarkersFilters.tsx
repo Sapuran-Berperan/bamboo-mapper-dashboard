@@ -1,7 +1,7 @@
-import { useEffect, useId, useState } from "react";
 import { format, parse } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { CalendarIcon, RotateCcw, Search } from "lucide-react";
+import { useEffect, useId, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
@@ -18,8 +18,8 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
 import { useDebounce } from "@/hooks/use-debounce";
+import { cn } from "@/lib/utils";
 import type { MarkersSearch } from "@/routes/markers";
 
 interface MarkersFiltersProps {
@@ -132,7 +132,7 @@ export function MarkersFilters({
 	return (
 		<div className="flex flex-wrap items-end gap-4 mb-6">
 			{/* Search Input */}
-			<div className="flex-1 min-w-[200px] max-w-sm">
+			<div className="flex-1 min-w-50 max-w-sm">
 				<Label htmlFor={searchId} className="mb-1.5 block">
 					Cari
 				</Label>
@@ -149,7 +149,7 @@ export function MarkersFilters({
 			</div>
 
 			{/* Sort Dropdown */}
-			<div className="w-[180px]">
+			<div className="w-45">
 				<Label htmlFor={sortId} className="mb-1.5 block">
 					Urutkan
 				</Label>
@@ -168,7 +168,7 @@ export function MarkersFilters({
 			</div>
 
 			{/* Date From */}
-			<div className="w-[160px]">
+			<div className="w-40">
 				<Label className="mb-1.5 block">Dari Tanggal</Label>
 				<Popover>
 					<PopoverTrigger asChild>
@@ -191,14 +191,14 @@ export function MarkersFilters({
 							selected={dateFromValue}
 							onSelect={handleDateFromChange}
 							disabled={(date) => (dateToValue ? date > dateToValue : false)}
-							initialFocus
+							autoFocus
 						/>
 					</PopoverContent>
 				</Popover>
 			</div>
 
 			{/* Date To */}
-			<div className="w-[160px]">
+			<div className="w-40">
 				<Label className="mb-1.5 block">Sampai Tanggal</Label>
 				<Popover>
 					<PopoverTrigger asChild>
@@ -223,14 +223,14 @@ export function MarkersFilters({
 							disabled={(date) =>
 								dateFromValue ? date < dateFromValue : false
 							}
-							initialFocus
+							autoFocus
 						/>
 					</PopoverContent>
 				</Popover>
 			</div>
 
 			{/* Creator ID */}
-			<div className="w-[280px]">
+			<div className="w-70">
 				<Label htmlFor={creatorIdInputId} className="mb-1.5 block">
 					Creator ID
 				</Label>
