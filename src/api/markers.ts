@@ -129,3 +129,14 @@ export async function updateMarker(
 		},
 	});
 }
+
+export async function deleteMarker(id: string): Promise<void> {
+	const accessToken = useAuthStore.getState().accessToken;
+
+	return apiClient(`/markers/${id}`, {
+		method: "DELETE",
+		headers: {
+			Authorization: `Bearer ${accessToken}`,
+		},
+	});
+}

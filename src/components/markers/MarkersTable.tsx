@@ -10,8 +10,19 @@ import {
 	ArrowUpDown,
 	ImageIcon,
 	Pencil,
+	Trash2,
 } from "lucide-react";
 import { useState } from "react";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -27,6 +38,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { useDeleteMarker } from "@/hooks/use-delete-marker";
 import type { MarkersSearch } from "@/routes/markers";
 import type { MarkerDetail } from "@/types/marker";
 import { MarkerFormDialog } from "./MarkerFormDialog";
@@ -112,7 +124,16 @@ export function MarkersTable({
 	onSort,
 }: MarkersTableProps) {
 	const [editingMarker, setEditingMarker] = useState<MarkerDetail | null>(null);
+	const [deletingMarker, setDeletingMarker] = useState<MarkerDetail | null>(
+		null,
+	);
 	const [previewImage, setPreviewImage] = useState<string | null>(null);
+
+	const deleteMarker = useDeleteMarker({
+		onSuccess: () => {
+			setDeletingMarker(null);
+		},
+	});
 
 	const columns: ColumnDef<MarkerDetail>[] = [
 		{
@@ -253,14 +274,24 @@ export function MarkersTable({
 			id: "actions",
 			header: "Aksi",
 			cell: ({ row }) => (
-				<Button
-					variant="ghost"
-					size="icon"
-					onClick={() => setEditingMarker(row.original)}
-					title="Edit marker"
-				>
-					<Pencil className="h-4 w-4" />
-				</Button>
+				<div className="flex items-center gap-1">
+					<Button
+						variant="ghost"
+						size="icon"
+						onClick={() => setEditingMarker(row.original)}
+						title="Edit marker"
+					>
+						<Pencil className="h-4 w-4" />
+					</Button>
+					<Button
+						variant="ghost"
+						size="icon"
+						onClick={() => setDeletingMarker(row.original)}
+						title="Hapus marker"
+					>
+						<Trash2 className="h-4 w-4 text-destructive" />
+					</Button>
+				</div>
 			),
 		},
 	];
@@ -353,6 +384,38 @@ export function MarkersTable({
 					</div>
 				</DialogContent>
 			</Dialog>
+
+			{/* Delete Confirmation Dialog */}
+			<AlertDialog
+				open={!!deletingMarker}
+				onOpenChange={(open) => {
+					if (!open) setDeletingMarker(null);
+				}}
+			>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>Hapus Marker</AlertDialogTitle>
+						<AlertDialogDescription>
+							Apakah Anda yakin ingin menghapus marker &quot;
+							{deletingMarker?.name}
+							&quot;? Tindakan ini tidak dapat dibatalkan.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel>Batal</AlertDialogCancel>
+						<AlertDialogAction
+							onClick={() => {
+								if (deletingMarker) {
+									deleteMarker.mutate(deletingMarker.id);
+								}
+							}}
+							className="bg-destructive text-white hover:bg-destructive/90"
+						>
+							Hapus
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		</>
 	);
 }
