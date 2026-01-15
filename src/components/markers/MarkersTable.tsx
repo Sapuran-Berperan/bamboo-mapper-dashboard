@@ -4,6 +4,8 @@ import {
 	getCoreRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
 	Table,
 	TableBody,
@@ -13,6 +15,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import type { MarkerDetail } from "@/types/marker";
+import type { MarkersSearch } from "@/routes/markers";
 
 function formatDateTime(dateString: string): string {
 	const date = new Date(dateString);
@@ -32,85 +35,174 @@ function truncateText(text: string, maxLength: number): string {
 	return `${text.slice(0, maxLength)}...`;
 }
 
-const columns: ColumnDef<MarkerDetail>[] = [
-	{
-		accessorKey: "short_code",
-		header: "Kode",
-		cell: ({ row }) => (
-			<span className="font-mono text-sm">{row.getValue("short_code")}</span>
-		),
-	},
-	{
-		accessorKey: "name",
-		header: "Nama",
-	},
-	{
-		accessorKey: "description",
-		header: "Deskripsi",
-		cell: ({ row }) => (
-			<span title={row.getValue("description")}>
-				{truncateText(row.getValue("description"), 30)}
-			</span>
-		),
-	},
-	{
-		accessorKey: "strain",
-		header: "Jenis Bambu",
-		cell: ({ row }) => row.getValue("strain") || "-",
-	},
-	{
-		accessorKey: "quantity",
-		header: "Jumlah",
-		cell: ({ row }) => {
-			const quantity = row.getValue("quantity") as number;
-			return quantity ?? "-";
-		},
-	},
-	{
-		id: "coordinates",
-		header: "Koordinat",
-		cell: ({ row }) => {
-			const lat = row.original.latitude;
-			const lng = row.original.longitude;
-			return (
-				<span className="font-mono text-xs">
-					{lat}, {lng}
-				</span>
-			);
-		},
-	},
-	{
-		accessorKey: "owner_name",
-		header: "Pemilik",
-		cell: ({ row }) => row.getValue("owner_name") || "-",
-	},
-	{
-		accessorKey: "owner_contact",
-		header: "Kontak",
-		cell: ({ row }) => row.getValue("owner_contact") || "-",
-	},
-	{
-		accessorKey: "created_at",
-		header: "Dibuat",
-		cell: ({ row }) => formatDateTime(row.getValue("created_at")),
-	},
-	{
-		accessorKey: "updated_at",
-		header: "Diperbarui",
-		cell: ({ row }) => formatDateTime(row.getValue("updated_at")),
-	},
-];
+type SortableColumn = NonNullable<MarkersSearch["sort_by"]>;
+
+interface SortableHeaderProps {
+	label: string;
+	column: SortableColumn;
+	currentSort: SortableColumn | undefined;
+	sortDir: MarkersSearch["sort_dir"];
+	onSort: (column: SortableColumn) => void;
+}
+
+function SortableHeader({
+	label,
+	column,
+	currentSort,
+	sortDir,
+	onSort,
+}: SortableHeaderProps) {
+	const isActive = currentSort === column;
+
+	return (
+		<Button
+			variant="ghost"
+			size="sm"
+			className="-ml-3 h-8 data-[state=open]:bg-accent"
+			onClick={() => onSort(column)}
+		>
+			{label}
+			{isActive ? (
+				sortDir === "asc" ? (
+					<ArrowUp className="ml-1 h-3 w-3" />
+				) : (
+					<ArrowDown className="ml-1 h-3 w-3" />
+				)
+			) : (
+				<ArrowUpDown className="ml-1 h-3 w-3 opacity-50" />
+			)}
+		</Button>
+	);
+}
 
 interface MarkersTableProps {
 	data: MarkerDetail[];
+	sortBy: MarkersSearch["sort_by"];
+	sortDir: MarkersSearch["sort_dir"];
+	onSort: (column: SortableColumn) => void;
 }
 
-export function MarkersTable({ data }: MarkersTableProps) {
+export function MarkersTable({
+	data,
+	sortBy,
+	sortDir,
+	onSort,
+}: MarkersTableProps) {
+	const columns: ColumnDef<MarkerDetail>[] = [
+		{
+			accessorKey: "short_code",
+			header: "Kode",
+			cell: ({ row }) => (
+				<span className="font-mono text-sm">{row.getValue("short_code")}</span>
+			),
+		},
+		{
+			accessorKey: "name",
+			header: () => (
+				<SortableHeader
+					label="Nama"
+					column="name"
+					currentSort={sortBy}
+					sortDir={sortDir}
+					onSort={onSort}
+				/>
+			),
+		},
+		{
+			accessorKey: "description",
+			header: "Deskripsi",
+			cell: ({ row }) => (
+				<span title={row.getValue("description")}>
+					{truncateText(row.getValue("description"), 30)}
+				</span>
+			),
+		},
+		{
+			accessorKey: "strain",
+			header: () => (
+				<SortableHeader
+					label="Jenis Bambu"
+					column="strain"
+					currentSort={sortBy}
+					sortDir={sortDir}
+					onSort={onSort}
+				/>
+			),
+			cell: ({ row }) => row.getValue("strain") || "-",
+		},
+		{
+			accessorKey: "quantity",
+			header: () => (
+				<SortableHeader
+					label="Jumlah"
+					column="quantity"
+					currentSort={sortBy}
+					sortDir={sortDir}
+					onSort={onSort}
+				/>
+			),
+			cell: ({ row }) => {
+				const quantity = row.getValue("quantity") as number;
+				return quantity ?? "-";
+			},
+		},
+		{
+			id: "coordinates",
+			header: "Koordinat",
+			cell: ({ row }) => {
+				const lat = row.original.latitude;
+				const lng = row.original.longitude;
+				return (
+					<span className="font-mono text-xs">
+						{lat}, {lng}
+					</span>
+				);
+			},
+		},
+		{
+			accessorKey: "owner_name",
+			header: "Pemilik",
+			cell: ({ row }) => row.getValue("owner_name") || "-",
+		},
+		{
+			accessorKey: "owner_contact",
+			header: "Kontak",
+			cell: ({ row }) => row.getValue("owner_contact") || "-",
+		},
+		{
+			accessorKey: "created_at",
+			header: () => (
+				<SortableHeader
+					label="Dibuat"
+					column="created_at"
+					currentSort={sortBy}
+					sortDir={sortDir}
+					onSort={onSort}
+				/>
+			),
+			cell: ({ row }) => formatDateTime(row.getValue("created_at")),
+		},
+		{
+			accessorKey: "updated_at",
+			header: () => (
+				<SortableHeader
+					label="Diperbarui"
+					column="updated_at"
+					currentSort={sortBy}
+					sortDir={sortDir}
+					onSort={onSort}
+				/>
+			),
+			cell: ({ row }) => formatDateTime(row.getValue("updated_at")),
+		},
+	];
+
 	const table = useReactTable({
 		data,
 		columns,
 		getCoreRowModel: getCoreRowModel(),
 		manualPagination: true,
+		manualSorting: true,
 	});
 
 	return (

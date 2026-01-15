@@ -1,18 +1,70 @@
+import { useCallback } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { AlertCircle, Loader2, Table2 } from "lucide-react";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { usePaginatedMarkers } from "@/hooks/use-paginated-markers";
+import { Route, type MarkersSearch } from "@/routes/markers";
+import { MarkersFilters } from "./MarkersFilters";
 import { MarkersPagination } from "./MarkersPagination";
 import { MarkersTable } from "./MarkersTable";
 
 export function MarkersPage() {
-	const [page, setPage] = useState(1);
-	const perPage = 10;
+	const search = Route.useSearch();
+	const navigate = useNavigate({ from: Route.fullPath });
+
+	const {
+		page,
+		per_page,
+		sort_by,
+		sort_dir,
+		search: searchQuery,
+		date_from,
+		date_to,
+		creator_id,
+	} = search;
 
 	const { data, isLoading, error, refetch, isFetching } = usePaginatedMarkers({
-		page,
-		per_page: perPage,
+		page: page ?? 1,
+		per_page: per_page ?? 10,
+		sort_by,
+		sort_dir,
+		search: searchQuery,
+		date_from,
+		date_to,
+		creator_id,
 	});
+
+	const updateFilters = useCallback(
+		(updates: Partial<MarkersSearch>) => {
+			navigate({
+				search: (prev) => {
+					const newSearch = { ...prev, ...updates };
+					// Reset to page 1 when filters change (except page itself)
+					if (!("page" in updates)) {
+						newSearch.page = 1;
+					}
+					return newSearch;
+				},
+			});
+		},
+		[navigate],
+	);
+
+	const handleSort = useCallback(
+		(column: MarkersSearch["sort_by"]) => {
+			const newDir: MarkersSearch["sort_dir"] =
+				sort_by === column && sort_dir === "desc" ? "asc" : "desc";
+			updateFilters({ sort_by: column, sort_dir: newDir });
+		},
+		[sort_by, sort_dir, updateFilters],
+	);
+
+	const handlePageChange = useCallback(
+		(newPage: number) => {
+			updateFilters({ page: newPage });
+		},
+		[updateFilters],
+	);
 
 	if (isLoading) {
 		return (
@@ -53,14 +105,29 @@ export function MarkersPage() {
 				{isFetching && <Loader2 className="h-4 w-4 animate-spin ml-2" />}
 			</div>
 
+			<MarkersFilters
+				search={searchQuery}
+				sortBy={sort_by}
+				sortDir={sort_dir}
+				dateFrom={date_from}
+				dateTo={date_to}
+				creatorId={creator_id}
+				onFilterChange={updateFilters}
+			/>
+
 			<div className="space-y-4">
-				<MarkersTable data={data?.data ?? []} />
+				<MarkersTable
+					data={data?.data ?? []}
+					sortBy={sort_by}
+					sortDir={sort_dir}
+					onSort={handleSort}
+				/>
 
 				{data?.pagination && (
 					<MarkersPagination
 						currentPage={data.pagination.current_page}
 						totalPages={data.pagination.total_pages}
-						onPageChange={setPage}
+						onPageChange={handlePageChange}
 					/>
 				)}
 			</div>
