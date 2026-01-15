@@ -24,6 +24,18 @@ import {
 import type { MarkerDetail } from "@/types/marker";
 import { LocationPicker } from "./LocationPicker";
 
+function getImageDisplayUrl(url: string): string {
+	// If it's a data URL (from file upload), return as-is
+	if (url.startsWith("data:")) {
+		return url;
+	}
+	// Convert Google Drive uc?id= to thumbnail?id= for embedding
+	if (url.includes("/uc?id=")) {
+		return `${url.replace("/uc?id=", "/thumbnail?id=")}&sz=w800`;
+	}
+	return url;
+}
+
 interface MarkerFormDialogProps {
 	marker?: MarkerDetail;
 	open?: boolean;
@@ -312,9 +324,10 @@ export function MarkerFormDialog({
 					{imagePreview ? (
 						<div className="relative">
 							<img
-								src={imagePreview}
+								src={getImageDisplayUrl(imagePreview)}
 								alt="Preview"
 								className="w-full h-48 object-cover rounded-md border"
+								referrerPolicy="no-referrer"
 							/>
 							<Button
 								type="button"
