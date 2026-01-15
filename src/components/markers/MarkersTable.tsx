@@ -1,8 +1,8 @@
 import {
-	useReactTable,
-	getCoreRowModel,
-	flexRender,
 	type ColumnDef,
+	flexRender,
+	getCoreRowModel,
+	useReactTable,
 } from "@tanstack/react-table";
 import {
 	Table,
@@ -14,12 +14,15 @@ import {
 } from "@/components/ui/table";
 import type { MarkerDetail } from "@/types/marker";
 
-function formatDate(dateString: string): string {
+function formatDateTime(dateString: string): string {
 	const date = new Date(dateString);
-	return date.toLocaleDateString("id-ID", {
+	return date.toLocaleString("id-ID", {
 		day: "numeric",
 		month: "short",
 		year: "numeric",
+		hour: "2-digit",
+		minute: "2-digit",
+		timeZone: "Asia/Jakarta",
 	});
 }
 
@@ -89,12 +92,12 @@ const columns: ColumnDef<MarkerDetail>[] = [
 	{
 		accessorKey: "created_at",
 		header: "Dibuat",
-		cell: ({ row }) => formatDate(row.getValue("created_at")),
+		cell: ({ row }) => formatDateTime(row.getValue("created_at")),
 	},
 	{
 		accessorKey: "updated_at",
 		header: "Diperbarui",
-		cell: ({ row }) => formatDate(row.getValue("updated_at")),
+		cell: ({ row }) => formatDateTime(row.getValue("updated_at")),
 	},
 ];
 
