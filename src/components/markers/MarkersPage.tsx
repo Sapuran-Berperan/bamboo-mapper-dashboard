@@ -4,6 +4,7 @@ import { useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { usePaginatedMarkers } from "@/hooks/use-paginated-markers";
 import { type MarkersSearch, Route } from "@/routes/markers";
+import { CreateMarkerDialog } from "./CreateMarkerDialog";
 import { MarkersFilters } from "./MarkersFilters";
 import { MarkersPagination } from "./MarkersPagination";
 import { MarkersTable } from "./MarkersTable";
@@ -96,13 +97,16 @@ export function MarkersPage() {
 
 	return (
 		<main className="p-6">
-			<div className="flex items-center gap-2 mb-6">
-				<Table2 className="h-5 w-5 text-muted-foreground" />
-				<h1 className="text-xl font-semibold">Daftar Marker</h1>
-				<span className="text-sm text-muted-foreground">
-					({data?.pagination.total_items ?? 0} total)
-				</span>
-				{isFetching && <Loader2 className="h-4 w-4 animate-spin ml-2" />}
+			<div className="flex items-center justify-between mb-6">
+				<div className="flex items-center gap-2">
+					<Table2 className="h-5 w-5 text-muted-foreground" />
+					<h1 className="text-xl font-semibold">Daftar Marker</h1>
+					<span className="text-sm text-muted-foreground">
+						({data?.pagination.total_items ?? 0} total)
+					</span>
+					{isFetching && <Loader2 className="h-4 w-4 animate-spin ml-2" />}
+				</div>
+				<CreateMarkerDialog />
 			</div>
 
 			<MarkersFilters

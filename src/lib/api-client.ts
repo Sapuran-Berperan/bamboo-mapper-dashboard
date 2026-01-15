@@ -142,6 +142,63 @@ export interface PaginatedApiResponse<T> {
 	};
 }
 
+export async function multipartApiClient<T>(
+	endpoint: string,
+	formData: FormData,
+	options: Omit<ApiClientOptions, "body"> = {},
+): Promise<T> {
+	const { _isRetry, ...fetchOptions } = options;
+	const url = `${API_BASE_URL}${endpoint}`;
+
+	// Don't set Content-Type - browser sets it with boundary for FormData
+	const config: RequestInit = {
+		...fetchOptions,
+		method: "POST",
+		body: formData,
+	};
+
+	const response = await fetch(url, config);
+
+	// Handle 401 Unauthorized - attempt token refresh
+	if (response.status === 401 && !_isRetry) {
+		const refreshed = await attemptRefresh();
+
+		if (refreshed) {
+			const newAccessToken = useAuthStore.getState().accessToken;
+
+			const retryHeaders = new Headers(fetchOptions.headers);
+			if (retryHeaders.has("Authorization")) {
+				retryHeaders.set("Authorization", `Bearer ${newAccessToken}`);
+			}
+
+			return multipartApiClient<T>(endpoint, formData, {
+				...fetchOptions,
+				headers: Object.fromEntries(retryHeaders.entries()),
+				_isRetry: true,
+			});
+		}
+
+		const json = await response.clone().json();
+		throw new ApiError(
+			response.status,
+			json.meta?.message || "Session expired. Please login again.",
+			json.meta?.details,
+		);
+	}
+
+	const json = await response.json();
+
+	if (!response.ok || !json.meta?.success) {
+		throw new ApiError(
+			response.status,
+			json.meta?.message || "Request failed",
+			json.meta?.details,
+		);
+	}
+
+	return json.data as T;
+}
+
 export async function paginatedApiClient<T>(
 	endpoint: string,
 	options: ApiClientOptions = {},

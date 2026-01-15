@@ -50,3 +50,14 @@ export interface PaginatedMarkersResponse {
 	data: MarkerDetail[];
 	pagination: PaginationMeta;
 }
+
+export interface CreateMarkerPayload {
+	name: string;
+	latitude: string;
+	longitude: string;
+	description?: string;
+	strain?: string;
+	quantity?: number;
+	owner_name?: string;
+	owner_contact?: string;
+}
