@@ -1,5 +1,6 @@
 import {
 	apiClient,
+	binaryApiClient,
 	multipartApiClient,
 	paginatedApiClient,
 } from "@/lib/api-client";
@@ -135,6 +136,17 @@ export async function deleteMarker(id: string): Promise<void> {
 
 	return apiClient(`/markers/${id}`, {
 		method: "DELETE",
+		headers: {
+			Authorization: `Bearer ${accessToken}`,
+		},
+	});
+}
+
+export async function getMarkerQRCode(id: string): Promise<Blob> {
+	const accessToken = useAuthStore.getState().accessToken;
+
+	return binaryApiClient(`/markers/${id}/qr`, {
+		method: "GET",
 		headers: {
 			Authorization: `Bearer ${accessToken}`,
 		},

@@ -1,19 +1,4 @@
 import {
-	type ColumnDef,
-	flexRender,
-	getCoreRowModel,
-	useReactTable,
-} from "@tanstack/react-table";
-import {
-	ArrowDown,
-	ArrowUp,
-	ArrowUpDown,
-	ImageIcon,
-	Pencil,
-	Trash2,
-} from "lucide-react";
-import { useState } from "react";
-import {
 	AlertDialog,
 	AlertDialogAction,
 	AlertDialogCancel,
@@ -39,8 +24,26 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { useDeleteMarker } from "@/hooks/use-delete-marker";
+import { useMarkerQR } from "@/hooks/use-marker-qr";
 import type { MarkersSearch } from "@/routes/markers";
 import type { MarkerDetail } from "@/types/marker";
+import {
+	type ColumnDef,
+	flexRender,
+	getCoreRowModel,
+	useReactTable,
+} from "@tanstack/react-table";
+import {
+	ArrowDown,
+	ArrowUp,
+	ArrowUpDown,
+	ImageIcon,
+	Pencil,
+	QrCode,
+	Trash2,
+} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import toast from "react-hot-toast";
 import { MarkerFormDialog } from "./MarkerFormDialog";
 
 function formatDateTime(dateString: string): string {
@@ -128,12 +131,50 @@ export function MarkersTable({
 		null,
 	);
 	const [previewImage, setPreviewImage] = useState<string | null>(null);
+	const [previewingQR, setPreviewingQR] = useState<string | null>(null);
+
+	const {
+		data: qrBlob,
+		isLoading: isQRLoading,
+		error: qrError,
+		refetch: refetchQR,
+	} = useMarkerQR(previewingQR);
 
 	const deleteMarker = useDeleteMarker({
 		onSuccess: () => {
 			setDeletingMarker(null);
 		},
 	});
+
+	// Create blob URL from QR blob data
+	const qrBlobUrl = useMemo(() => {
+		if (!qrBlob) return null;
+		return URL.createObjectURL(qrBlob);
+	}, [qrBlob]);
+
+	// Cleanup blob URL when dialog closes or component unmounts
+	useEffect(() => {
+		return () => {
+			if (qrBlobUrl) {
+				URL.revokeObjectURL(qrBlobUrl);
+			}
+		};
+	}, [qrBlobUrl]);
+
+	// Get marker being previewed for dialog title and download filename
+	const previewingMarker = useMemo(
+		() => data.find((m) => m.id === previewingQR),
+		[data, previewingQR],
+	);
+
+	const handleDownloadQR = () => {
+		if (!qrBlobUrl || !previewingMarker) return;
+
+		const a = document.createElement("a");
+		a.href = qrBlobUrl;
+		a.download = `${previewingMarker.short_code}.png`;
+		a.click();
+	};
 
 	const columns: ColumnDef<MarkerDetail>[] = [
 		{
@@ -170,6 +211,20 @@ export function MarkersTable({
 					</button>
 				);
 			},
+		},
+		{
+			id: "qr",
+			header: "QR Code",
+			cell: ({ row }) => (
+				<Button
+					variant="ghost"
+					size="icon"
+					onClick={() => setPreviewingQR(row.original.id)}
+					aria-label="Lihat QR Code"
+				>
+					<QrCode className="h-4 w-4" />
+				</Button>
+			),
 		},
 		{
 			accessorKey: "name",
@@ -380,6 +435,63 @@ export function MarkersTable({
 								className="max-w-full max-h-[calc(90vh-100px)] object-contain rounded"
 								referrerPolicy="no-referrer"
 							/>
+						)}
+					</div>
+				</DialogContent>
+			</Dialog>
+
+			{/* QR Code Preview Dialog */}
+			<Dialog
+				open={!!previewingQR}
+				onOpenChange={(open) => {
+					if (!open) setPreviewingQR(null);
+				}}
+			>
+				<DialogContent className="max-w-md">
+					<DialogHeader>
+						<DialogTitle>
+							QR Code - {previewingMarker?.name || "Loading..."}
+						</DialogTitle>
+					</DialogHeader>
+					<div className="flex flex-col items-center justify-center gap-4 py-4">
+						{isQRLoading && (
+							<div className="flex flex-col items-center gap-2">
+								<div className="h-64 w-64 animate-pulse rounded bg-muted" />
+								<p className="text-sm text-muted-foreground">
+									Memuat QR code...
+								</p>
+							</div>
+						)}
+						{qrError && (
+							<div className="flex flex-col items-center gap-4">
+								<p className="text-sm text-destructive">
+									{qrError.message || "Gagal memuat QR code"}
+								</p>
+								<Button variant="outline" onClick={() => refetchQR()}>
+									Coba Lagi
+								</Button>
+							</div>
+						)}
+						{qrBlobUrl && !isQRLoading && !qrError && (
+							<>
+								<img
+									src={qrBlobUrl}
+									alt={`QR Code ${previewingMarker?.short_code}`}
+									className="h-64 w-64 rounded border"
+								/>
+								<div className="flex w-full gap-2">
+									<Button
+										variant="outline"
+										className="flex-1"
+										onClick={() => setPreviewingQR(null)}
+									>
+										Tutup
+									</Button>
+									<Button className="flex-1" onClick={handleDownloadQR}>
+										Download
+									</Button>
+								</div>
+							</>
 						)}
 					</div>
 				</DialogContent>

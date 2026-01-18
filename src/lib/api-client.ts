@@ -263,3 +263,74 @@ export async function paginatedApiClient<T>(
 		pagination: json.meta.pagination,
 	};
 }
+
+export async function binaryApiClient(
+	endpoint: string,
+	options: ApiClientOptions = {},
+): Promise<Blob> {
+	const { _isRetry, ...fetchOptions } = options;
+	const url = `${API_BASE_URL}${endpoint}`;
+
+	const config: RequestInit = {
+		...fetchOptions,
+		headers: {
+			...fetchOptions.headers,
+		},
+	};
+
+	const response = await fetch(url, config);
+
+	// Handle 401 Unauthorized - attempt token refresh
+	if (response.status === 401 && !_isRetry) {
+		const refreshed = await attemptRefresh();
+
+		if (refreshed) {
+			const newAccessToken = useAuthStore.getState().accessToken;
+
+			const retryHeaders = new Headers(config.headers);
+			if (retryHeaders.has("Authorization")) {
+				retryHeaders.set("Authorization", `Bearer ${newAccessToken}`);
+			}
+
+			return binaryApiClient(endpoint, {
+				...fetchOptions,
+				headers: Object.fromEntries(retryHeaders.entries()),
+				_isRetry: true,
+			});
+		}
+
+		// Try parsing error as JSON, fallback to generic message
+		try {
+			const json: ApiResponse<unknown> = await response.clone().json();
+			throw new ApiError(
+				response.status,
+				json.meta?.message || "Session expired. Please login again.",
+				json.meta?.details,
+			);
+		} catch (e) {
+			if (e instanceof ApiError) throw e;
+			throw new ApiError(
+				response.status,
+				"Session expired. Please login again.",
+			);
+		}
+	}
+
+	// Handle non-2xx responses
+	if (!response.ok) {
+		// Try parsing error as JSON, fallback to generic message
+		try {
+			const json: ApiResponse<unknown> = await response.clone().json();
+			throw new ApiError(
+				response.status,
+				json.meta?.message || "Gagal memuat data",
+				json.meta?.details,
+			);
+		} catch (e) {
+			if (e instanceof ApiError) throw e;
+			throw new ApiError(response.status, "Gagal memuat data");
+		}
+	}
+
+	return response.blob();
+}
