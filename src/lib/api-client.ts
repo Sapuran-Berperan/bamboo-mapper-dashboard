@@ -132,6 +132,38 @@ export async function apiClient<T>(
 	return json.data as T;
 }
 
+/**
+ * Public API client for unauthenticated requests (e.g., QR code deeplinks).
+ * No Authorization header, no token refresh logic.
+ */
+export async function publicApiClient<T>(
+	endpoint: string,
+	options: RequestInit = {},
+): Promise<T> {
+	const url = `${API_BASE_URL}${endpoint}`;
+
+	const config: RequestInit = {
+		...options,
+		headers: {
+			"Content-Type": "application/json",
+			...options.headers,
+		},
+	};
+
+	const response = await fetch(url, config);
+	const json: ApiResponse<T> = await response.json();
+
+	if (!response.ok || !json.meta?.success) {
+		throw new ApiError(
+			response.status,
+			json.meta?.message || "Request failed",
+			json.meta?.details,
+		);
+	}
+
+	return json.data as T;
+}
+
 export interface PaginatedApiResponse<T> {
 	data: T;
 	pagination: {

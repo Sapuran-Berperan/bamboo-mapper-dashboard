@@ -13,6 +13,7 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as MarkersRouteImport } from './routes/markers'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MarkerShortCodeRouteImport } from './routes/marker/$shortCode'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -34,18 +35,25 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MarkerShortCodeRoute = MarkerShortCodeRouteImport.update({
+  id: '/marker/$shortCode',
+  path: '/marker/$shortCode',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/markers': typeof MarkersRoute
   '/register': typeof RegisterRoute
+  '/marker/$shortCode': typeof MarkerShortCodeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/markers': typeof MarkersRoute
   '/register': typeof RegisterRoute
+  '/marker/$shortCode': typeof MarkerShortCodeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +61,20 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/markers': typeof MarkersRoute
   '/register': typeof RegisterRoute
+  '/marker/$shortCode': typeof MarkerShortCodeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/markers' | '/register'
+  fullPaths: '/' | '/login' | '/markers' | '/register' | '/marker/$shortCode'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/markers' | '/register'
-  id: '__root__' | '/' | '/login' | '/markers' | '/register'
+  to: '/' | '/login' | '/markers' | '/register' | '/marker/$shortCode'
+  id:
+    | '__root__'
+    | '/'
+    | '/login'
+    | '/markers'
+    | '/register'
+    | '/marker/$shortCode'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +82,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MarkersRoute: typeof MarkersRoute
   RegisterRoute: typeof RegisterRoute
+  MarkerShortCodeRoute: typeof MarkerShortCodeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -99,6 +115,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/marker/$shortCode': {
+      id: '/marker/$shortCode'
+      path: '/marker/$shortCode'
+      fullPath: '/marker/$shortCode'
+      preLoaderRoute: typeof MarkerShortCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -107,6 +130,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   MarkersRoute: MarkersRoute,
   RegisterRoute: RegisterRoute,
+  MarkerShortCodeRoute: MarkerShortCodeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

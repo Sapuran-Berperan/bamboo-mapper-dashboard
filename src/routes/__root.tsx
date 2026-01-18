@@ -19,7 +19,7 @@ import { useAuthValidation } from "@/hooks/use-auth";
 import { useAuthStore } from "@/stores/auth-store";
 
 // Routes that don't require authentication
-const PUBLIC_ROUTES = ["/login", "/register"];
+const PUBLIC_ROUTES = ["/login", "/register", "/marker"];
 
 interface RouterContext {
 	queryClient: QueryClient;

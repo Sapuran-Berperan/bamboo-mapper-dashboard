@@ -3,6 +3,7 @@ import {
 	binaryApiClient,
 	multipartApiClient,
 	paginatedApiClient,
+	publicApiClient,
 } from "@/lib/api-client";
 import { useAuthStore } from "@/stores/auth-store";
 import type {
@@ -150,5 +151,15 @@ export async function getMarkerQRCode(id: string): Promise<Blob> {
 		headers: {
 			Authorization: `Bearer ${accessToken}`,
 		},
+	});
+}
+
+/**
+ * Fetch marker details by short code (public endpoint, no auth required).
+ * Used for QR code deeplinks.
+ */
+export async function getMarkerByCode(shortCode: string): Promise<MarkerDetail> {
+	return publicApiClient<MarkerDetail>(`/markers/code/${shortCode}`, {
+		method: "GET",
 	});
 }
