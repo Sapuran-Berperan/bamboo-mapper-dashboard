@@ -76,15 +76,15 @@ export function AppSidebar() {
 			<SidebarFooter className="p-4">
 				<SidebarSeparator className="mb-4" />
 				<div className="flex flex-col gap-3">
-					<div className="flex items-center gap-3">
-						<div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-medium">
+					<div className="flex items-center gap-3 min-w-0">
+						<div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-medium flex-shrink-0">
 							{user?.name?.charAt(0).toUpperCase() ?? "U"}
 						</div>
-						<div className="flex flex-col">
-							<span className="text-sm font-medium">
+						<div className="flex flex-col min-w-0 flex-1">
+							<span className="text-sm font-medium truncate">
 								{user?.name ?? "User"}
 							</span>
-							<span className="text-xs text-muted-foreground">
+							<span className="text-xs text-muted-foreground truncate">
 								{user?.email ?? ""}
 							</span>
 						</div>
