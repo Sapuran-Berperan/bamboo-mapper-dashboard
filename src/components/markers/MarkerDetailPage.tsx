@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import toast from "react-hot-toast";
 import { BambooMap } from "@/components/BambooMap";
@@ -106,15 +106,6 @@ export function MarkerDetailPage() {
 		if (apiError.status === 404) {
 			return (
 				<div className="container mx-auto p-4 max-w-4xl">
-					<Button
-						variant="ghost"
-						size="sm"
-						onClick={() => navigate({ to: "/" })}
-						className="mb-4"
-					>
-						<ArrowLeft className="h-4 w-4 mr-2" />
-						Kembali
-					</Button>
 					<Card>
 						<CardContent className="text-center py-12">
 							<h2 className="text-xl font-semibold mb-2">
@@ -134,15 +125,6 @@ export function MarkerDetailPage() {
 
 		return (
 			<div className="container mx-auto p-4 max-w-4xl">
-				<Button
-					variant="ghost"
-					size="sm"
-					onClick={() => navigate({ to: "/" })}
-					className="mb-4"
-				>
-					<ArrowLeft className="h-4 w-4 mr-2" />
-					Kembali
-				</Button>
 				<Card>
 					<CardContent className="text-center py-12">
 						<p className="text-destructive mb-4">
