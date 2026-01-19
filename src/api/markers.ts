@@ -158,7 +158,9 @@ export async function getMarkerQRCode(id: string): Promise<Blob> {
  * Fetch marker details by short code (public endpoint, no auth required).
  * Used for QR code deeplinks.
  */
-export async function getMarkerByCode(shortCode: string): Promise<MarkerDetail> {
+export async function getMarkerByCode(
+	shortCode: string,
+): Promise<MarkerDetail> {
 	return publicApiClient<MarkerDetail>(`/markers/code/${shortCode}`, {
 		method: "GET",
 	});

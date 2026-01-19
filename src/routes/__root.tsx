@@ -31,7 +31,10 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 		const isPublic = PUBLIC_ROUTES.some((route) => {
 			// For /marker route, match exactly /marker/* but not /markers
 			if (route === "/marker") {
-				return location.pathname === "/marker" || location.pathname.startsWith("/marker/");
+				return (
+					location.pathname === "/marker" ||
+					location.pathname.startsWith("/marker/")
+				);
 			}
 			return location.pathname.startsWith(route);
 		});
@@ -84,7 +87,10 @@ function RootComponent() {
 	const isPublicRoute = PUBLIC_ROUTES.some((route) => {
 		// For /marker route, match exactly /marker/* but not /markers
 		if (route === "/marker") {
-			return location.pathname === "/marker" || location.pathname.startsWith("/marker/");
+			return (
+				location.pathname === "/marker" ||
+				location.pathname.startsWith("/marker/")
+			);
 		}
 		return location.pathname.startsWith(route);
 	});
