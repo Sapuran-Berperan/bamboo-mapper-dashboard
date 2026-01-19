@@ -28,7 +28,15 @@ interface RouterContext {
 export const Route = createRootRouteWithContext<RouterContext>()({
 	beforeLoad: async ({ location }) => {
 		// Skip auth check for public routes
-		if (PUBLIC_ROUTES.some((route) => location.pathname.startsWith(route))) {
+		const isPublic = PUBLIC_ROUTES.some((route) => {
+			// For /marker route, match exactly /marker/* but not /markers
+			if (route === "/marker") {
+				return location.pathname === "/marker" || location.pathname.startsWith("/marker/");
+			}
+			return location.pathname.startsWith(route);
+		});
+
+		if (isPublic) {
 			return;
 		}
 
@@ -73,9 +81,13 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 
 function RootComponent() {
 	const location = useLocation();
-	const isPublicRoute = PUBLIC_ROUTES.some((route) =>
-		location.pathname.startsWith(route),
-	);
+	const isPublicRoute = PUBLIC_ROUTES.some((route) => {
+		// For /marker route, match exactly /marker/* but not /markers
+		if (route === "/marker") {
+			return location.pathname === "/marker" || location.pathname.startsWith("/marker/");
+		}
+		return location.pathname.startsWith(route);
+	});
 
 	// Validate auth on mount and periodically for protected routes
 	useAuthValidation();
