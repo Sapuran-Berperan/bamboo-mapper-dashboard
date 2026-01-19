@@ -1,0 +1,62 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Setup Bun
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # 4. Run linting and formatting checks
+      - name: Run code quality checks
+        run: bun run check
+
+      # 5. Build the project
+      - name: Build project
+        run: bun run build
+
+      # 6. Upload build artifacts (for debugging)
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+
+      # 7. Configure SSH
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p ${{ secrets.VPS_PORT }} ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+
+      # 8. Deploy to VPS via rsync
+      - name: Deploy to VPS
+        run: |
+          rsync -avz --delete --checksum \
+            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.VPS_PORT }}" \
+            dist/ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/bamboo-mapper-dashboard/
+
+      # 9. Cleanup SSH key
+      - name: Cleanup
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
